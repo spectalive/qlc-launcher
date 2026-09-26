@@ -1,6 +1,8 @@
 """2026-09-13: two evenings lost to normal launches without the web server."""
 
 import errno
+import io
+import os
 from pathlib import Path
 import socket
 import subprocess
@@ -16,7 +18,7 @@ from default_address import default_address
 from interrupt_launch import interrupt_launch
 from launch import main
 from listener_pids import listener_pids
-from notify import notify
+from notify import APP_NOTIFICATION_ENV, APP_NOTIFICATION_PREFIX, notify
 from offline_workspace import offline_workspace
 from pioneer_guard import pioneer_guard
 from reserve_port import reserve_port
@@ -198,6 +200,26 @@ class LauncherTests(unittest.TestCase):
         self.assertEqual(command[-2:], [message, title])
         self.assertNotIn(message, command[-3])
         self.assertNotIn(title, command[-3])
+
+    @patch("notify.subprocess.run")
+    def test_app_launch_hands_success_to_the_app_instead_of_osascript(self, run):
+        """LauncherApp.swift sets APP_NOTIFICATION_ENV and reads this line off launch.py's stdout (2026-09-26:
+        osascript's `display notification` posts as Script Editor, which macOS drops silently)."""
+        message = "QLC+ Vibra on 10.20.30.40:9998"
+        output = io.StringIO()
+        with patch.dict(os.environ, {APP_NOTIFICATION_ENV: "1"}), patch("sys.stdout", output):
+            notify(message)
+        run.assert_not_called()
+        self.assertIn(f"{APP_NOTIFICATION_PREFIX}{message}", output.getvalue().splitlines())
+
+    @patch("notify.subprocess.run")
+    def test_app_launch_still_shows_error_dialogs_through_osascript(self, run):
+        """Error dialogs already work (only notifications were dropped); the handoff must not touch them."""
+        message = "QLC+ Vibra could not start: boom."
+        with patch.dict(os.environ, {APP_NOTIFICATION_ENV: "1"}):
+            notify(message, error=True)
+        run.assert_called_once()
+        self.assertIn(message, run.call_args.args[0])
 
     def test_verification_copy_cannot_drive_hardware_or_modify_show(self):
         with tempfile.TemporaryDirectory() as directory:

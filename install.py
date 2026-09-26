@@ -57,6 +57,8 @@ def main():
             shutil.copyfile(icon, resources / "qlcplus.icns")
         subprocess.run(["/usr/bin/swiftc", "-parse-as-library", str(source / "LauncherApp.swift"),
                         str(source / "resolve_bookmark.swift"), str(source / "workspace_arguments.swift"),
+                        str(source / "notification_handoff.swift"), str(source / "child_output_relay.swift"),
+                        str(source / "success_notification.swift"),
                         "-o", str(executable)], check=True)
         # Compiled once rather than interpreted per bookmark: the interpreted run died twice with exit 144.
         create_bookmark = Path(temporary) / "create_bookmark"

@@ -109,19 +109,33 @@ with a dialog: move the old app aside and install again.
    settings and Focus. Successful startup leaves QLC+ running after the
    launcher exits. This proves HTTP availability, not physical DMX operation.
 
-The notification is issued without interpolating values into AppleScript:
+The error dialog is issued without interpolating values into AppleScript:
 
 ```sh
 /usr/bin/osascript -e 'on run argv
-display notification (item 1 of argv) with title (item 2 of argv)
-end run' 'QLC+ Vibra on ADDRESS:PORT' 'QLC+ Vibra'
+display dialog (item 1 of argv) with title (item 2 of argv) buttons {"OK"} default button "OK" with icon stop giving up after 60
+end run' 'QLC+ Vibra could not start: ...' 'QLC+ Vibra'
 ```
+
+**2026-09-26: the success banner posts from the app, not `osascript`.**
+`display notification` attributes the banner to Script Editor, the process
+that runs the `-e` script; on a Mac where Script Editor was never opened,
+Notification Center has no entry for it and drops the banner silently while
+`osascript` still returns 0. When LauncherApp launched `launch.py`, it sets
+`QLC_LAUNCHER_NOTIFY_VIA_APP=1` in its environment; `notify.py` then prints
+the success message on stdout behind the `QLC-LAUNCHER-NOTIFY:` prefix
+instead of calling `osascript`. `child_output_relay.swift` reads that line
+back out of the child's stdout pipe, and `success_notification.swift` posts
+it through `UNUserNotificationCenter` under the launcher's own bundle id,
+asking for alert authorization on the first launch. Run by hand from a
+shell, `launch.py` has no such environment variable and keeps using
+`osascript` for both the notification and the error dialog above.
 
 The [QLC+ web-interface documentation](https://docs.qlcplus.org/v5/advanced/web-interface)
 describes the web flags; the installed binary's `--help` is the checked
 spelling authority. Apple's documentation describes
 [bookmark resolution](https://developer.apple.com/documentation/foundation/url/init(resolvingbookmarkdata:options:relativeto:bookmarkdataisstale:)-3ic6f)
-and [native notifications](https://developer.apple.com/library/archive/documentation/LanguagesUtilities/Conceptual/MacAutomationScriptingGuide/DisplayNotifications.html).
+and [`UNUserNotificationCenter`](https://developer.apple.com/documentation/usernotifications/unusernotificationcenter).
 
 ## Verification
 

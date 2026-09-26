@@ -29,8 +29,18 @@ struct LauncherApp {
             process.executableURL = URL(fileURLWithPath: python)
             process.arguments = arguments
             process.currentDirectoryURL = launcher
+            var environment = ProcessInfo.processInfo.environment
+            environment[notificationHandoffEnvironmentVariable] = "1"
+            process.environment = environment
+            let outputPipe = Pipe()
+            process.standardOutput = outputPipe
+            let relay = ChildOutputRelay(pipe: outputPipe)
             try process.run()
             process.waitUntilExit()
+            relay.drain()
+            if let message = relay.notificationMessage {
+                postSuccessNotification(title: name, body: message)
+            }
             if process.terminationStatus != 0 {
                 exit(process.terminationStatus)
             }
