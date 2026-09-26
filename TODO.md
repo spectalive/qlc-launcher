@@ -14,3 +14,11 @@
   observed (2026-09-13).** Every verification ran `launch.py` or `open` from a
   shell. Smallest next step: click the Dock icon at the rig and note the
   banner.
+- [ ] **`install.py` died twice with exit 144 and no traceback (2026-09-26).**
+  On the Mac mini, run from an agent's shell, the installer stopped after
+  `codesign` and `Launcher.bookmark`, before `Workspace.bookmark` (the second
+  interpreted `swift create_bookmark.swift`); the third identical run
+  succeeded, and the same step run alone always did. Nothing is left
+  half-installed (the bundle is copied last), but a rerun is needed.
+  Smallest next step: compile `create_bookmark.swift` once with `swiftc`
+  into the build directory and call the binary, then see whether it recurs.
