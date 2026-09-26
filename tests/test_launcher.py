@@ -23,27 +23,45 @@ from reserve_port import reserve_port
 from stop_process import stop_process
 from wait_ready import wait_ready
 
+CONFIG = {"qlcplus": Path("/Applications/QLC+.app/Contents/MacOS/qlcplus-qml"), "workspace": Path("/shows/Show.qxw")}
+WORKSPACE = b"""<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Workspace>
+<Workspace xmlns="http://www.qlcplus.org/Workspace" CurrentWindow="VirtualConsole">
+ <Engine>
+  <InputOutputMap>
+   <Universe Name="Universe 1" ID="0">
+    <Output Plugin="DMX USB" Line="0"/>
+   </Universe>
+  </InputOutputMap>
+  <Function ID="0" Type="Scene" Name="Red"/>
+  <StartupFunction>0</StartupFunction>
+ </Engine>
+</Workspace>
+"""
+
 
 class LauncherTests(unittest.TestCase):
     """Exercise real bind conflicts and the safety boundaries around launch."""
 
     @patch("launch.signal.signal")
+    @patch("launch.read_config", return_value=CONFIG)
     @patch("launch.notify")
     @patch("launch.subprocess.Popen")
     @patch("launch.os.access", return_value=False)
     @patch("sys.argv", ["launch.py"])
-    def test_missing_binary_does_not_spawn(self, access, spawn, message, signal):
+    def test_missing_binary_does_not_spawn(self, access, spawn, message, config, signal):
         self.assertEqual(main(), 1)
         spawn.assert_not_called()
         self.assertIn("executable is missing", message.call_args.args[0])
 
     @patch("launch.signal.signal")
+    @patch("launch.read_config", return_value=CONFIG)
     @patch("launch.notify")
     @patch("launch.subprocess.Popen")
     @patch("launch.os.access", return_value=True)
     @patch("launch.Path.is_file", side_effect=[True, False])
     @patch("sys.argv", ["launch.py"])
-    def test_missing_workspace_does_not_spawn(self, is_file, access, spawn, message, signal):
+    def test_missing_workspace_does_not_spawn(self, is_file, access, spawn, message, config, signal):
         self.assertEqual(main(), 1)
         spawn.assert_not_called()
         self.assertIn("workspace is missing", message.call_args.args[0])
@@ -57,6 +75,7 @@ class LauncherTests(unittest.TestCase):
                 patch("sys.argv", ["launch.py"]), \
                 patch("launch.signal.signal"), \
                 patch("launch.Path.home", return_value=Path(directory)), \
+                patch("launch.read_config", return_value=CONFIG), \
                 patch("launch.Path.is_file", return_value=True), \
                 patch("launch.os.access", return_value=True), \
                 patch("launch.pioneer_guard"), \
@@ -173,19 +192,23 @@ class LauncherTests(unittest.TestCase):
     @patch("notify.subprocess.run")
     def test_notification_message_is_an_argument_not_code(self, run):
         message = 'QLC+ Vibra on "quoted" address'
-        notify(message)
+        title = 'A "quoted" show'
+        notify(message, title=title)
         command = run.call_args.args[0]
-        self.assertEqual(command[-1], message)
-        self.assertNotIn(message, command[-2])
+        self.assertEqual(command[-2:], [message, title])
+        self.assertNotIn(message, command[-3])
+        self.assertNotIn(title, command[-3])
 
     def test_verification_copy_cannot_drive_hardware_or_modify_show(self):
-        source = Path(__file__).resolve().parents[3] / "QLC+ Setups" / "Vibra.qxw"
-        original = source.read_bytes()
         with tempfile.TemporaryDirectory() as directory:
-            output = offline_workspace(source, Path(directory) / "Vibra.qxw")
+            source = Path(directory) / "Show.qxw"
+            source.write_bytes(WORKSPACE)
+            original = source.read_bytes()
+            output = offline_workspace(source, Path(directory) / "Copy.qxw")
             self.assertIn(b"<!DOCTYPE Workspace>", output.read_bytes())
             root = ET.parse(output).getroot()
             self.assertEqual(root.findall(".//{*}InputOutputMap"), [])
             self.assertEqual(root.findall(".//{*}Output"), [])
+            self.assertEqual(root.findall(".//{*}StartupFunction"), [])
             self.assertTrue(root.findall(".//{*}Function"))
-        self.assertEqual(source.read_bytes(), original)
+            self.assertEqual(source.read_bytes(), original)
