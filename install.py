@@ -10,6 +10,7 @@ import subprocess
 import tempfile
 
 from bundle_identifier import bundle_identifier
+from default_bundle_prefix import DEFAULT_PREFIX
 from find_python import find_python
 from write_config import write_config
 
@@ -24,9 +25,13 @@ def main():
                         help="The QLC+ executable inside its app bundle (default: %(default)s).")
     parser.add_argument("--name", default="QLC+ Vibra",
                         help="App name; also names the bundle id and the state folder (default: %(default)s).")
+    parser.add_argument("--bundle-prefix", default=DEFAULT_PREFIX,
+                        help="Reverse-DNS prefix of the bundle id, ending in a dot (default: %(default)s).")
     args = parser.parse_args()
+    # Both are resolved: the config and the bookmark then name the real file, not a symlink to it.
     workspace = args.workspace.expanduser().resolve()
-    qlcplus = args.qlcplus.expanduser().absolute()
+    qlcplus = args.qlcplus.expanduser().resolve()
+    identifier = bundle_identifier(args.name, args.bundle_prefix)
     if not workspace.is_file():
         raise SystemExit(f"Workspace not found: {workspace}")
     if not qlcplus.is_file() or not os.access(qlcplus, os.X_OK):
@@ -51,12 +56,16 @@ def main():
         if icon.is_file():
             shutil.copyfile(icon, resources / "qlcplus.icns")
         subprocess.run(["/usr/bin/swiftc", "-parse-as-library", str(source / "LauncherApp.swift"),
-                        str(source / "resolve_bookmark.swift"), "-o", str(executable)], check=True)
+                        str(source / "resolve_bookmark.swift"), str(source / "workspace_arguments.swift"),
+                        "-o", str(executable)], check=True)
+        # Compiled once rather than interpreted per bookmark: the interpreted run died twice with exit 144.
+        create_bookmark = Path(temporary) / "create_bookmark"
+        subprocess.run(["/usr/bin/swiftc", str(source / "create_bookmark.swift"), "-o", str(create_bookmark)], check=True)
         (resources / "PythonPath").write_text(str(python) + "\n")
         with (contents / "Info.plist").open("wb") as output:
             plistlib.dump({
                 "CFBundleExecutable": args.name,
-                "CFBundleIdentifier": bundle_identifier(args.name),
+                "CFBundleIdentifier": identifier,
                 "CFBundleName": args.name,
                 "CFBundleDisplayName": args.name,
                 "CFBundleIconFile": "qlcplus.icns" if icon.is_file() else "",
@@ -69,7 +78,7 @@ def main():
         subprocess.run(["/usr/bin/codesign", "--force", "--sign", "-", str(bundle)], check=True)
         write_config(state / "launcher.toml", qlcplus, workspace)
         for target, bookmark in ((source, "Launcher.bookmark"), (workspace.parent, "Workspace.bookmark")):
-            subprocess.run(["/usr/bin/swift", str(source / "create_bookmark.swift"), str(target), str(state / bookmark)], check=True)
+            subprocess.run([str(create_bookmark), str(target), str(state / bookmark)], check=True)
         shutil.copytree(bundle, destination)
     print(f"Installed {destination} for {workspace}. Drag it from Finder into the Dock.")
     return 0

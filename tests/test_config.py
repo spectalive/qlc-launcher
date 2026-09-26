@@ -52,6 +52,12 @@ class ConfigTests(unittest.TestCase):
         with self.assertRaises(SystemExit):
             bundle_identifier("+++")
 
+    def test_bundle_prefix_is_a_reverse_dns_prefix(self):
+        self.assertEqual(bundle_identifier("QLC+ Vibra", "org.example."), "org.example.qlc-vibra")
+        for prefix in ("org.example", "", ".org.", "org..example.", "org example."):
+            with self.subTest(prefix=prefix), self.assertRaisesRegex(SystemExit, "Bundle prefix"):
+                bundle_identifier("QLC+ Vibra", prefix)
+
     def test_python_without_tomllib_is_skipped(self):
         self.assertEqual(find_python((Path("/nonexistent/python3"), Path(sys.executable))), Path(sys.executable))
         with self.assertRaises(SystemExit):

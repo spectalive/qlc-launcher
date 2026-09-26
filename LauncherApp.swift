@@ -21,10 +21,7 @@ struct LauncherApp {
                 ])
             }
             var arguments = [script.path, "--name", name]
-            let workspaceBookmark = state.appendingPathComponent("Workspace.bookmark")
-            if FileManager.default.fileExists(atPath: workspaceBookmark.path) {
-                arguments += ["--workspace-folder", try resolveBookmark(at: workspaceBookmark).path]
-            }
+            arguments += workspaceArguments(bookmark: state.appendingPathComponent("Workspace.bookmark"))
             let python = try String(
                 contentsOf: resources.appendingPathComponent("PythonPath"), encoding: .utf8
             ).trimmingCharacters(in: .whitespacesAndNewlines)

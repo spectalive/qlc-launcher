@@ -26,7 +26,11 @@ python3 qlc-launcher/install.py --workspace "/path/to/Show.qxw"
 | --- | --- | --- |
 | `--workspace` | (required) | The `.qxw` QLC+ opens. |
 | `--qlcplus` | `/Applications/QLC+ 5.2.2.app/Contents/MacOS/qlcplus-qml` | The QLC+ executable. Its app's `qlcplus.icns` becomes the launcher's icon. |
-| `--name` | `QLC+ Vibra` | The app name. It also names the bundle id (`com.busirocket.<slug>`, so `com.busirocket.qlc-vibra` by default) and the state folder. |
+| `--name` | `QLC+ Vibra` | The app name. It also names the bundle id (`PREFIX<slug>`, so `com.busirocket.qlc-vibra` by default) and the state folder. |
+| `--bundle-prefix` | `com.busirocket.` | The bundle id's reverse-DNS prefix, ending in a dot. The default keeps the Vibra mini's original id. |
+
+Both paths are resolved through symlinks before they are checked and written
+to the config, so the config and the bookmark name the real files.
 
 The Vibra rig's Mac mini, for example:
 
@@ -71,8 +75,11 @@ moved; the folder keeps its identity through both
 (`tests/check_bookmark_move.swift` checks exactly that). The app resolves the
 folder and passes it to `launch.py` as `--workspace-folder`; the file name
 comes from `launcher.toml`. Run by hand, `launch.py` uses the absolute path in
-the config. After a copy to another volume a bookmark cannot resolve: move the
-old app aside and install again.
+the config, and so does the app when `Workspace.bookmark` is missing, corrupt
+or points at a folder that is gone: it no longer refuses to start, it drops
+`--workspace-folder` (`tests/check_stale_workspace_bookmark.swift`). After a
+copy to another volume `Launcher.bookmark` cannot resolve and the app stops
+with a dialog: move the old app aside and install again.
 
 ## Startup contract
 
@@ -123,6 +130,9 @@ From the checkout:
 ```sh
 python3 -m unittest discover -s tests -v
 swift tests/check_bookmark_move.swift
+swiftc -parse-as-library workspace_arguments.swift resolve_bookmark.swift \
+  tests/check_stale_workspace_bookmark.swift -o /tmp/check_stale_workspace_bookmark \
+  && /tmp/check_stale_workspace_bookmark
 python3 launch.py --name "QLC+ Vibra" --test-no-output
 ```
 
@@ -145,8 +155,9 @@ occupied, competing listener ownership, HTTP content/timeout/early exit, Pioneer
 detection, default-route address selection, child-only cleanup, safe notification
 arguments, an I/O-free temporary workspace with its required doctype, and the
 config: round trip with awkward paths, missing or invalid files, relative
-paths, the bundle id derived from the name, and the state folder and workspace
-folder the app passes in.
+paths, the bundle id derived from the name and prefix, the state folder and
+workspace folder the app passes in, and the installer's refusal to touch an
+existing bundle.
 
 A tablet finder run is a separate integration check. When another show is
 live, verify its existing connection before and after, and confirm no test
