@@ -1,5 +1,13 @@
 # TODO
 
+> Consolidated from the accessible agent conversation history of this project.
+> Last reviewed: 2026-10-12. History coverage: Partial. Not re-audited during the
+> 2026-10-12 format migration.
+>
+> States: `[ ]` pending · `[~]` partial or unverified · `[!]` blocked · `[x]`
+> verified complete · `[-]` obsolete or superseded. Closed work moves to
+> `TODO_LOG.md`.
+
 - [ ] **Clients find the show by themselves (from Vibra-Lab/vibra-lighting,
   2026-09-26).** Announce the running show over mDNS/Bonjour, and show a QR
   code with `http://ADDRESS:PORT/`, so a tablet or phone reaches it without

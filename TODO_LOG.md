@@ -3,6 +3,8 @@
 Closed work from [TODO.md](TODO.md), newest month first. Every entry carries
 the evidence that closed it.
 
+<!-- tadu:log v1 since 2026-10-12 -->
+
 ## 2026
 
 ### 2026-09
