@@ -3,7 +3,13 @@
 from pathlib import Path
 import subprocess
 
-CANDIDATES = (Path("/opt/homebrew/bin/python3"), Path("/usr/local/bin/python3"), Path("/usr/bin/python3"))
+# Homebrew's newer python@3.x formulae link only the versioned name, so an
+# unversioned python3 may be missing while python3.14 sits next to it.
+CANDIDATES = tuple(
+    Path(prefix) / name
+    for prefix in ("/opt/homebrew/bin", "/usr/local/bin")
+    for name in ("python3", "python3.14", "python3.13", "python3.12", "python3.11")
+) + (Path("/usr/bin/python3"),)
 
 
 def find_python(candidates=CANDIDATES):

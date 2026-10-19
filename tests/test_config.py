@@ -9,7 +9,7 @@ from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from bundle_identifier import bundle_identifier
-from find_python import find_python
+from find_python import CANDIDATES, find_python
 from launch import main
 from read_config import read_config
 from write_config import write_config
@@ -62,6 +62,13 @@ class ConfigTests(unittest.TestCase):
         self.assertEqual(find_python((Path("/nonexistent/python3"), Path(sys.executable))), Path(sys.executable))
         with self.assertRaises(SystemExit):
             find_python((Path("/nonexistent/python3"),))
+
+    def test_versioned_homebrew_python_is_a_candidate(self):
+        # 2026-10-19: Homebrew's python@3.14 linked only python3.14, the
+        # installed app named the vanished /opt/homebrew/bin/python3.
+        self.assertIn(Path("/opt/homebrew/bin/python3.14"), CANDIDATES)
+        self.assertEqual(CANDIDATES[0], Path("/opt/homebrew/bin/python3"))
+        self.assertEqual(CANDIDATES[-1], Path("/usr/bin/python3"))
 
     @patch("launch.signal.signal")
     @patch("launch.notify")

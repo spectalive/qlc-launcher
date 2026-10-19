@@ -43,3 +43,17 @@ the evidence that closed it.
   `launch.py --name "QLC+ Vibra" --test-no-output` passed the HTTP check on
   its own QLC+ PID 54431 (port 9998) and stopped it. No other QLC+ was
   running before or after.
+
+### 2026-10
+
+- [x] 2026-10-19 — **General:** **The installed app's Python is gone on the Mac mini (2026-10-19).**
+  `~/Applications/QLC+ Vibra.app/Contents/Resources/PythonPath` names
+  `/opt/homebrew/bin/python3`, which no longer exists (Homebrew now links
+  only `python3.13` and `python3.14` there; `python3.14`'s link is dated
+  2026-10-11), so the Dock app's `Process.run()` has no interpreter to start
+  `launch.py` with (not exercised: the live app was not launched). `find_python.py` only tries unversioned
+  `python3` names. Smallest next step: owner decides between `brew link
+  python@3.14` (restores the path, no reinstall) or teaching `find_python.py`
+  versioned names and reinstalling the app.
+  - Result: The Dock app starts again; Homebrew's versioned-only python@3.14 is found.
+  - Evidence: find_python tries versioned Homebrew names; 38 unittest OK under python3.14; app reinstalled on the mini 2026-10-19 (old bundle kept as QLC+ Vibra.pre-python-fix-2026-10-19.app), PythonPath=/opt/homebrew/bin/python3.14; open launched qlcplus-qml on 9998 (HTTP 200 in 8 s) and dns-sd -B listed QLC+ Vibra _http._tcp

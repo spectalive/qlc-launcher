@@ -22,15 +22,6 @@
   in a detached run. Python only, so the installed app picks it up on its
   next launch with no reinstall. Smallest next step: the QR code with
   `http://ADDRESS:PORT/`.
-- [!] **The installed app's Python is gone on the Mac mini (2026-10-19).**
-  `~/Applications/QLC+ Vibra.app/Contents/Resources/PythonPath` names
-  `/opt/homebrew/bin/python3`, which no longer exists (Homebrew now links
-  only `python3.13` and `python3.14` there; `python3.14`'s link is dated
-  2026-10-11), so the Dock app's `Process.run()` has no interpreter to start
-  `launch.py` with (not exercised: the live app was not launched). `find_python.py` only tries unversioned
-  `python3` names. Smallest next step: owner decides between `brew link
-  python@3.14` (restores the path, no reinstall) or teaching `find_python.py`
-  versioned names and reinstalling the app.
 - [ ] **Choose the show at launch (from vibra-lighting, 2026-09-26).** Today a
   show is chosen at install time (`--workspace`, one app per `--name`).
   Smallest next step: decide whether a picker at launch is still wanted now
