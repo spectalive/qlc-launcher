@@ -9,11 +9,13 @@ import subprocess
 import sys
 import tempfile
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import ANY, MagicMock, patch
 import xml.etree.ElementTree as ET
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from announce_show import announce_show
+import announce_until_exit
 from default_address import default_address
 from interrupt_launch import interrupt_launch
 from launch import main
@@ -23,6 +25,7 @@ from offline_workspace import offline_workspace
 from pioneer_guard import pioneer_guard
 from reserve_port import reserve_port
 from stop_process import stop_process
+from wait_for_exit import wait_for_exit
 from wait_ready import wait_ready
 
 CONFIG = {"qlcplus": Path("/Applications/QLC+.app/Contents/MacOS/qlcplus-qml"), "workspace": Path("/shows/Show.qxw")}
@@ -234,3 +237,80 @@ class LauncherTests(unittest.TestCase):
             self.assertEqual(root.findall(".//{*}StartupFunction"), [])
             self.assertTrue(root.findall(".//{*}Function"))
             self.assertEqual(source.read_bytes(), original)
+
+    def launch_until_ready(self, directory, announce):
+        """Run a normal (non-test) launch whose QLC+ passes the HTTP check on port 9999."""
+        with patch("sys.argv", ["launch.py"]), \
+                patch("launch.signal.signal"), \
+                patch("launch.Path.home", return_value=Path(directory)), \
+                patch("launch.read_config", return_value=CONFIG), \
+                patch("launch.Path.is_file", return_value=True), \
+                patch("launch.os.access", return_value=True), \
+                patch("launch.pioneer_guard"), \
+                patch("launch.default_address", return_value="10.20.30.40"), \
+                patch("launch.reserve_port") as reservation, \
+                patch("launch.subprocess.Popen", return_value=MagicMock(pid=123)), \
+                patch("launch.wait_ready") as ready, \
+                patch("launch.announce_show", announce), \
+                patch("launch.notify") as message:
+            reservation.return_value.__enter__.return_value.getsockname.return_value = ("::", 9999)
+            ready.side_effect = lambda process, port: announce.assert_not_called()
+            return main(), message
+
+    def test_launch_announces_the_verified_port_after_the_http_check(self):
+        """2026-10-19: tablets find the show over Bonjour instead of a typed address."""
+        announce = MagicMock()
+        with tempfile.TemporaryDirectory() as directory:
+            status, message = self.launch_until_ready(directory, announce)
+        self.assertEqual(status, 0)
+        announce.assert_called_once_with("QLC+ Vibra", 9999, 123, ANY)
+        self.assertFalse(message.call_args.kwargs.get("error", False))
+
+    def test_failed_announce_does_not_fail_a_verified_show(self):
+        announce = MagicMock(side_effect=OSError("no python"))
+        with tempfile.TemporaryDirectory() as directory:
+            status, message = self.launch_until_ready(directory, announce)
+        self.assertEqual(status, 0)
+        self.assertIn("10.20.30.40:9999", message.call_args.args[0])
+
+    @patch("announce_show.subprocess.Popen")
+    def test_announce_runs_detached_and_off_the_app_pipe(self, spawn):
+        """LauncherApp drains launch.py's stdout to EOF; an announce holding that pipe would hang the app."""
+        log = MagicMock()
+        announce_show("QLC+ Vibra", 9998, 123, log)
+        command = spawn.call_args.args[0]
+        self.assertTrue(command[1].endswith("announce_until_exit.py"))
+        self.assertEqual(command[2:], ["--name", "QLC+ Vibra", "--port", "9998", "--pid", "123"])
+        self.assertTrue(spawn.call_args.kwargs["start_new_session"])
+        self.assertIs(spawn.call_args.kwargs["stdout"], log)
+
+    def test_wait_for_exit_names_the_process_that_exited(self):
+        with subprocess.Popen(["/bin/sleep", "30"]) as stays, subprocess.Popen(["/bin/sleep", "0.2"]) as leaves:
+            try:
+                self.assertEqual(wait_for_exit([stays.pid, leaves.pid]), leaves.pid)
+            finally:
+                stays.kill()
+
+    def test_wait_for_exit_returns_at_once_for_a_process_already_gone(self):
+        gone = subprocess.Popen(["/usr/bin/true"])
+        gone.wait()
+        self.assertEqual(wait_for_exit([gone.pid]), gone.pid)
+
+    def test_announce_is_withdrawn_when_qlc_exits(self):
+        """No dns-sd may outlive the show it announces."""
+        spawn = subprocess.Popen
+        started = []
+
+        def stand_in(command, **options):
+            started.append((command, spawn(["/bin/sleep", "30"], **options)))
+            return started[-1][1]
+
+        with subprocess.Popen(["/bin/sleep", "0.3"]) as qlc, \
+                patch("announce_until_exit.signal.signal"), \
+                patch("announce_until_exit.subprocess.Popen", side_effect=stand_in), \
+                patch("sys.argv", ["announce_until_exit.py", "--name", "QLC+ Vibra", "--port", "9998", "--pid", str(qlc.pid)]), \
+                patch("sys.stdout", io.StringIO()):
+            self.assertEqual(announce_until_exit.main(), 0)
+            command, announce = started[0]
+        self.assertEqual(command, ["/usr/bin/dns-sd", "-R", "QLC+ Vibra", "_http._tcp", "local", "9998"])
+        self.assertIsNotNone(announce.poll())

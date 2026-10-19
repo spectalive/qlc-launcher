@@ -9,6 +9,7 @@ import signal
 import subprocess
 import tempfile
 
+from announce_show import announce_show
 from default_address import default_address
 from interrupt_launch import interrupt_launch
 from notify import notify
@@ -69,6 +70,12 @@ def main():
                 print(f"Started QLC+ PID {process.pid}, port {port}.", flush=True)
                 wait_ready(process, port)
                 print(f"HTTP check passed: http://127.0.0.1:{port}/ contains QLC+; listener PID {process.pid}.", flush=True)
+                try:
+                    with (state / "announce.log").open("w") as announce_log:
+                        announcer = announce_show(args.name, port, process.pid, announce_log)
+                    print(f"Bonjour: announcing {args.name} as _http._tcp on port {port} (PID {announcer.pid}) while QLC+ runs.", flush=True)
+                except Exception as announce_error:
+                    print(f"Bonjour announce failed, the show runs without it: {announce_error}", flush=True)
                 notify(f"{args.name} on {address}:{port}" + (" (test: no hardware output)" if args.test_no_output else ""), title=args.name)
                 ready = True
                 if args.test_no_output:

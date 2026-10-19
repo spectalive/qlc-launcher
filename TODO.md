@@ -8,12 +8,29 @@
 > verified complete · `[-]` obsolete or superseded. Closed work moves to
 > `TODO_LOG.md`.
 
-- [ ] **Clients find the show by themselves (from Vibra-Lab/vibra-lighting,
+- [~] **Clients find the show by themselves (from Vibra-Lab/vibra-lighting,
   2026-09-26).** Announce the running show over mDNS/Bonjour, and show a QR
   code with `http://ADDRESS:PORT/`, so a tablet or phone reaches it without
-  typing an address. Smallest next step: register `_http._tcp` with
-  `dns-sd -R` (or `NSNetService`) for the verified port once the HTTP check
-  passes, and stop it with the child.
+  typing an address.
+  2026-10-19: the announce is done. After the HTTP check `launch.py` starts
+  `announce_until_exit.py` detached, which keeps `dns-sd -R NAME _http._tcp
+  local PORT` alive until that QLC+ PID exits. Verified on the Mac mini with
+  a scratch `--test-no-output` launch on 9999 (9998 held by a dummy
+  listener): `dns-sd -B _http._tcp local` showed `Add ... QLC+ Announce
+  Test` at the HTTP check and `Rmv` when the test QLC+ stopped 90 s later,
+  with no `dns-sd` left; `dns-sd -L` resolved it to `Mac-mini-...local.:9997`
+  in a detached run. Python only, so the installed app picks it up on its
+  next launch with no reinstall. Smallest next step: the QR code with
+  `http://ADDRESS:PORT/`.
+- [!] **The installed app's Python is gone on the Mac mini (2026-10-19).**
+  `~/Applications/QLC+ Vibra.app/Contents/Resources/PythonPath` names
+  `/opt/homebrew/bin/python3`, which no longer exists (Homebrew now links
+  only `python3.13` and `python3.14` there; `python3.14`'s link is dated
+  2026-10-11), so the Dock app's `Process.run()` has no interpreter to start
+  `launch.py` with (not exercised: the live app was not launched). `find_python.py` only tries unversioned
+  `python3` names. Smallest next step: owner decides between `brew link
+  python@3.14` (restores the path, no reinstall) or teaching `find_python.py`
+  versioned names and reinstalling the app.
 - [ ] **Choose the show at launch (from vibra-lighting, 2026-09-26).** Today a
   show is chosen at install time (`--workspace`, one app per `--name`).
   Smallest next step: decide whether a picker at launch is still wanted now

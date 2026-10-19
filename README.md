@@ -57,6 +57,7 @@ never in this repository:
 | `Launcher.bookmark` | A Foundation bookmark to this checkout, where `launch.py` lives. |
 | `Workspace.bookmark` | A bookmark to the workspace's **folder**. |
 | `qlcplus.log`, `launch.lock` | QLC+'s output from the last launch, and the start lock. |
+| `announce.log` | The Bonjour announce's `dns-sd` output from the last launch. |
 
 `launcher.toml` for the example above:
 
@@ -108,6 +109,13 @@ with a dialog: move the old app aside and install again.
    a native dialog. Notification banners remain subject to macOS notification
    settings and Focus. Successful startup leaves QLC+ running after the
    launcher exits. This proves HTTP availability, not physical DMX operation.
+8. Announce the verified port over Bonjour as `_http._tcp`, named after the
+   app: `announce_until_exit.py` runs in its own session, outside the app's
+   stdout pipe, and keeps `/usr/bin/dns-sd -R NAME _http._tcp local PORT`
+   alive until that QLC+ PID exits (a kqueue exit watch, so no polling and no
+   reliance on QLC+ being its child), then stops it. It also stops on
+   `SIGTERM` or when `dns-sd` itself dies. A failed announce is printed and
+   the show keeps running; `dns-sd -B _http._tcp local` lists it.
 
 The error dialog is issued without interpolating values into AppleScript:
 
@@ -167,7 +175,9 @@ which workspace QLC+ loaded.
 The Python tests cover real IPv4/IPv6 bind conflicts, port fallback, both ports
 occupied, competing listener ownership, HTTP content/timeout/early exit, Pioneer
 detection, default-route address selection, child-only cleanup, safe notification
-arguments, an I/O-free temporary workspace with its required doctype, and the
+arguments, an I/O-free temporary workspace with its required doctype, the
+Bonjour announce (started only after the HTTP check, detached, withdrawn when
+QLC+ exits, never failing a verified show), and the
 config: round trip with awkward paths, missing or invalid files, relative
 paths, the bundle id derived from the name and prefix, the state folder and
 workspace folder the app passes in, and the installer's refusal to touch an
