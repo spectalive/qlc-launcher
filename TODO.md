@@ -22,10 +22,6 @@
   in a detached run. Python only, so the installed app picks it up on its
   next launch with no reinstall. Smallest next step: the QR code with
   `http://ADDRESS:PORT/`.
-- [ ] **Choose the show at launch (from vibra-lighting, 2026-09-26).** Today a
-  show is chosen at install time (`--workspace`, one app per `--name`).
-  Smallest next step: decide whether a picker at launch is still wanted now
-  that several named apps can be installed side by side.
 - [~] **The success banner is never shown on the Mac mini (2026-09-26).**
   `open ~/Applications/QLC+ Vibra.app` (LaunchServices, the Dock's path)
   started QLC+ on 9998 with the show, but six screen captures over 9 s show no

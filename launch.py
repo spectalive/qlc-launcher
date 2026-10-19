@@ -12,10 +12,12 @@ import tempfile
 from announce_show import announce_show
 from default_address import default_address
 from interrupt_launch import interrupt_launch
+from last_qlcplus_workspace import last_qlcplus_workspace
 from notify import notify
 from offline_workspace import offline_workspace
 from pioneer_guard import pioneer_guard
 from read_config import read_config
+from read_qlcplus_preferences import read_qlcplus_preferences
 from reserve_port import reserve_port
 from stop_process import stop_process
 from wait_ready import wait_ready
@@ -41,6 +43,9 @@ def main():
         workspace = config["workspace"]
         if args.workspace_folder is not None:
             workspace = args.workspace_folder / workspace.name
+        # The show follows QLC+: whatever it opened last, the installed one only
+        # when QLC+ has no recent show that still exists.
+        workspace = last_qlcplus_workspace(read_qlcplus_preferences()) or workspace
         if not binary.is_file() or not os.access(binary, os.X_OK):
             raise RuntimeError(f"QLC+ executable is missing or not executable: {binary}")
         if not workspace.is_file():

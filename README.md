@@ -24,7 +24,7 @@ python3 qlc-launcher/install.py --workspace "/path/to/Show.qxw"
 
 | Flag | Default | Meaning |
 | --- | --- | --- |
-| `--workspace` | (required) | The `.qxw` QLC+ opens. |
+| `--workspace` | (required) | The `.qxw` QLC+ opens when it has no recent show of its own (see the startup contract). |
 | `--qlcplus` | `/Applications/QLC+ 5.2.2.app/Contents/MacOS/qlcplus-qml` | The QLC+ executable. Its app's `qlcplus.icns` becomes the launcher's icon. |
 | `--name` | `QLC+ Vibra` | The app name. It also names the bundle id (`PREFIX<slug>`, so `com.busirocket.qlc-vibra` by default) and the state folder. |
 | `--bundle-prefix` | `com.busirocket.` | The bundle id's reverse-DNS prefix, ending in a dot. The default keeps the Vibra mini's original id. |
@@ -84,7 +84,11 @@ with a dialog: move the old app aside and install again.
 
 ## Startup contract
 
-1. Read `launcher.toml`; require the QLC+ executable and the workspace.
+1. Read `launcher.toml`; require the QLC+ executable and the workspace. The
+   show is the one QLC+ opened last: the newest `workspace.recentN` in
+   `defaults export "org.qlcplus.Q Light Controller Plus"` that still exists,
+   skipping `qlctool validate`'s hidden `.qlctool-validate-` copies. The
+   installed workspace is used only when there is none.
 2. Refuse a running `FwUpdateManagerd` or `com.pioneerdj.FwUpdateManagerd`
    executable. That Pioneer service can wedge QLC+'s libusb plugin scan.
    The launcher does not stop services or existing QLC+ processes.

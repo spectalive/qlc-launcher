@@ -15,6 +15,13 @@ from read_config import read_config
 from write_config import write_config
 
 
+def setUpModule():
+    """Keep the machine's own QLC+ recent list out of every launch here."""
+    patcher = patch("launch.read_qlcplus_preferences", return_value={})
+    patcher.start()
+    unittest.addModuleCleanup(patcher.stop)
+
+
 class ConfigTests(unittest.TestCase):
     """The installer's config is the only place the show and QLC+ are named."""
 

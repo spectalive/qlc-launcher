@@ -57,3 +57,10 @@ the evidence that closed it.
   versioned names and reinstalling the app.
   - Result: The Dock app starts again; Homebrew's versioned-only python@3.14 is found.
   - Evidence: find_python tries versioned Homebrew names; 38 unittest OK under python3.14; app reinstalled on the mini 2026-10-19 (old bundle kept as QLC+ Vibra.pre-python-fix-2026-10-19.app), PythonPath=/opt/homebrew/bin/python3.14; open launched qlcplus-qml on 9998 (HTTP 200 in 8 s) and dns-sd -B listed QLC+ Vibra _http._tcp
+
+- [x] 2026-10-19 — **General:** **Choose the show at launch (from vibra-lighting, 2026-09-26).** Today a
+  show is chosen at install time (`--workspace`, one app per `--name`).
+  Smallest next step: decide whether a picker at launch is still wanted now
+  that several named apps can be installed side by side.
+  - Result: No picker: launch.py opens the newest existing workspace in QLC+'s own recent list (last_qlcplus_workspace.py, read_qlcplus_preferences.py), skipping qlctool's validation copies; the installed workspace is the fallback. Owner 2026-10-19: "lo suyo es que se sincronice con lo que tiene QLC no que tenga que abrir nada".
+  - Evidence: python3.14 -m unittest discover -s tests: 43 OK (5 new in tests/test_last_workspace.py); live launch.py --test-no-output on the mini picked QLC+ Setups/Vibra.qxw past a deleted temp recent0, HTTP check passed on 9999 and stopped.

@@ -45,6 +45,13 @@ WORKSPACE = b"""<?xml version="1.0" encoding="UTF-8"?>
 """
 
 
+def setUpModule():
+    """Keep the machine's own QLC+ recent list out of every launch here."""
+    patcher = patch("launch.read_qlcplus_preferences", return_value={})
+    patcher.start()
+    unittest.addModuleCleanup(patcher.stop)
+
+
 class LauncherTests(unittest.TestCase):
     """Exercise real bind conflicts and the safety boundaries around launch."""
 
