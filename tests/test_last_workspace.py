@@ -37,6 +37,18 @@ class LastWorkspaceTests(unittest.TestCase):
                            "workspace.recent2": str(show)}
             self.assertEqual(last_qlcplus_workspace(preferences), show)
 
+    def test_live_test_workspace_is_not_launched_as_the_show(self):
+        """2026-10-21: the desk briefly linked to a live Art-Net test copy."""
+        with tempfile.TemporaryDirectory() as directory:
+            test_copy = Path(directory) / "pytest-of-owner" / "pytest-1" / "live.qxw"
+            test_copy.parent.mkdir(parents=True)
+            test_copy.touch()
+            show = Path(directory) / "Vibra.qxw"
+            show.touch()
+            preferences = {"workspace.recent0": str(test_copy),
+                           "workspace.recent1": str(show)}
+            self.assertEqual(last_qlcplus_workspace(preferences), show)
+
     def test_recent10_sorts_after_recent2(self):
         with tempfile.TemporaryDirectory() as directory:
             second = Path(directory) / "second.qxw"

@@ -17,6 +17,8 @@ def last_qlcplus_workspace(preferences):
     for _, workspace in sorted(recent):
         if ".qlctool-validate-" in workspace.name:
             continue
+        if any(part.startswith("pytest-of-") for part in workspace.parts):
+            continue
         if workspace.is_file():
             return workspace
     return None

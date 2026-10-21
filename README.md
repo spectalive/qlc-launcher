@@ -87,7 +87,8 @@ with a dialog: move the old app aside and install again.
 1. Read `launcher.toml`; require the QLC+ executable and the workspace. The
    show is the one QLC+ opened last: the newest `workspace.recentN` in
    `defaults export "org.qlcplus.Q Light Controller Plus"` that still exists,
-   skipping `qlctool validate`'s hidden `.qlctool-validate-` copies. The
+   skipping `qlctool validate`'s hidden `.qlctool-validate-` copies and live
+   pytest workspace copies. The
    installed workspace is used only when there is none.
 2. Refuse a running `FwUpdateManagerd` or `com.pioneerdj.FwUpdateManagerd`
    executable. That Pioneer service can wedge QLC+'s libusb plugin scan.

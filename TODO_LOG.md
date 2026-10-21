@@ -46,6 +46,10 @@ the evidence that closed it.
 
 ### 2026-10
 
+- [x] 2026-10-21 — **Launch:** Skip live pytest workspace copies in QLC+'s recent list.
+  - Result: A concurrent Art-Net test put its temporary `live.qxw` first, and the launcher briefly opened it for the desk. The recent-file selector now skips `pytest-of-*` paths while retaining real recent shows.
+  - Evidence: `python3 -m unittest discover -s tests -q` passed 44 tests, including the new regression; the live master was restarted with the shipped Vibra workspace.
+
 - [x] 2026-10-19 — **General:** **The installed app's Python is gone on the Mac mini (2026-10-19).**
   `~/Applications/QLC+ Vibra.app/Contents/Resources/PythonPath` names
   `/opt/homebrew/bin/python3`, which no longer exists (Homebrew now links
