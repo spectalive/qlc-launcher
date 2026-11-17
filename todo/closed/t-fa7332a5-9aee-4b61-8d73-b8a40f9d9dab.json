@@ -1,0 +1,19 @@
+{
+  "tadu": 2,
+  "id": "t-fa7332a5-9aee-4b61-8d73-b8a40f9d9dab",
+  "title": "2026-09-26 - **The installer's refusal to overwrite has a test.**",
+  "state": "done",
+  "category": "general",
+  "type": "untriaged",
+  "priority": "untriaged",
+  "notes": [
+    "`tests/test_install.py`: a temporary home with an existing bundle raises",
+    "`Already installed`, leaves the bundle byte-for-byte, runs no build step",
+    "and creates no state folder; with the refusal disabled the test fails."
+  ],
+  "closed": "2026-11-17",
+  "result": "2026-09-26 - **The installer's refusal to overwrite has a test.**",
+  "evidence": [
+    "legacy item migrated to format 2 without a recorded evidence"
+  ]
+}

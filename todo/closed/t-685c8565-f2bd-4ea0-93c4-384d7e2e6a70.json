@@ -1,0 +1,18 @@
+{
+  "tadu": 2,
+  "id": "t-685c8565-f2bd-4ea0-93c4-384d7e2e6a70",
+  "title": "2026-09-26 - **`--workspace` and `--qlcplus` are both `.resolve()`d.**",
+  "state": "done",
+  "category": "general",
+  "type": "untriaged",
+  "priority": "untriaged",
+  "notes": [
+    "Picked resolve so the config and the bookmark name the real files; the",
+    "mini's config came out identical to the one before."
+  ],
+  "closed": "2026-11-17",
+  "result": "2026-09-26 - **`--workspace` and `--qlcplus` are both `.resolve()`d.**",
+  "evidence": [
+    "legacy item migrated to format 2 without a recorded evidence"
+  ]
+}

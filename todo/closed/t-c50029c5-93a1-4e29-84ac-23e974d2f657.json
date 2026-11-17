@@ -1,0 +1,19 @@
+{
+  "tadu": 2,
+  "id": "t-c50029c5-93a1-4e29-84ac-23e974d2f657",
+  "title": "2026-09-26 - **`install.py` exit 144: `create_bookmark.swift` is",
+  "state": "done",
+  "category": "general",
+  "type": "untriaged",
+  "priority": "untriaged",
+  "notes": [
+    "compiled once with `swiftc` and the binary is called per bookmark.** The",
+    "reinstall on the mini ran clean in one pass (exit 0). One run cannot prove",
+    "the interpreted-`swift` death is gone; reopen if an install stops again."
+  ],
+  "closed": "2026-11-17",
+  "result": "2026-09-26 - **`install.py` exit 144: `create_bookmark.swift` is",
+  "evidence": [
+    "legacy item migrated to format 2 without a recorded evidence"
+  ]
+}

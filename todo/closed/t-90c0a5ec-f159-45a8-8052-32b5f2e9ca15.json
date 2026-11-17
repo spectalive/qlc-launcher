@@ -1,0 +1,18 @@
+{
+  "tadu": 2,
+  "id": "t-90c0a5ec-f159-45a8-8052-32b5f2e9ca15",
+  "title": "2026-09-26 - **`--bundle-prefix`, default `com.busirocket.`.**",
+  "state": "done",
+  "category": "general",
+  "type": "untriaged",
+  "priority": "untriaged",
+  "notes": [
+    "Validated as reverse-DNS labels ending in a dot; the reinstalled mini keeps",
+    "`com.busirocket.qlc-vibra`. Tests in `tests/test_config.py`."
+  ],
+  "closed": "2026-11-17",
+  "result": "2026-09-26 - **`--bundle-prefix`, default `com.busirocket.`.**",
+  "evidence": [
+    "legacy item migrated to format 2 without a recorded evidence"
+  ]
+}

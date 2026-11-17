@@ -1,0 +1,14 @@
+{
+  "tadu": 2,
+  "id": "t-c4ab0408-5331-4434-89ce-3eaae1436864",
+  "title": "Skip live pytest workspace copies in QLC+'s recent list",
+  "state": "done",
+  "category": "launch",
+  "type": "untriaged",
+  "priority": "untriaged",
+  "closed": "2026-10-21",
+  "result": "A concurrent Art-Net test put its temporary `live.qxw` first, and the launcher briefly opened it for the desk. The recent-file selector now skips `pytest-of-*` paths while retaining real recent shows.",
+  "evidence": [
+    "`python3 -m unittest discover -s tests -q` passed 44 tests, including the new regression; the live master was restarted with the shipped Vibra workspace."
+  ]
+}

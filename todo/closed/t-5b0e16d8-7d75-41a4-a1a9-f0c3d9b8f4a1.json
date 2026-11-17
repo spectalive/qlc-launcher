@@ -1,0 +1,21 @@
+{
+  "tadu": 2,
+  "id": "t-5b0e16d8-7d75-41a4-a1a9-f0c3d9b8f4a1",
+  "title": "Choose the show at launch (from vibra-lighting, 2026-09-26)",
+  "state": "done",
+  "category": "general",
+  "type": "untriaged",
+  "priority": "untriaged",
+  "notes": [
+    "Today a",
+    "",
+    "show is chosen at install time (`--workspace`, one app per `--name`).",
+    "Smallest next step: decide whether a picker at launch is still wanted now",
+    "that several named apps can be installed side by side."
+  ],
+  "closed": "2026-10-19",
+  "result": "No picker: launch.py opens the newest existing workspace in QLC+'s own recent list (last_qlcplus_workspace.py, read_qlcplus_preferences.py), skipping qlctool's validation copies; the installed workspace is the fallback. Owner 2026-10-19: \"lo suyo es que se sincronice con lo que tiene QLC no que tenga que abrir nada\".",
+  "evidence": [
+    "python3.14 -m unittest discover -s tests: 43 OK (5 new in tests/test_last_workspace.py); live launch.py --test-no-output on the mini picked QLC+ Setups/Vibra.qxw past a deleted temp recent0, HTTP check passed on 9999 and stopped."
+  ]
+}

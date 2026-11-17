@@ -1,0 +1,24 @@
+{
+  "tadu": 2,
+  "id": "t-699efc71-7035-49b1-8cdf-44b50dcfb09c",
+  "title": "The installed app's Python is gone on the Mac mini (2026-10-19)",
+  "state": "done",
+  "category": "general",
+  "type": "untriaged",
+  "priority": "untriaged",
+  "notes": [
+    "`~/Applications/QLC+ Vibra.app/Contents/Resources/PythonPath` names",
+    "`/opt/homebrew/bin/python3`, which no longer exists (Homebrew now links",
+    "only `python3.13` and `python3.14` there; `python3.14`'s link is dated",
+    "2026-10-11), so the Dock app's `Process.run()` has no interpreter to start",
+    "`launch.py` with (not exercised: the live app was not launched). `find_python.py` only tries unversioned",
+    "`python3` names. Smallest next step: owner decides between `brew link",
+    "python@3.14` (restores the path, no reinstall) or teaching `find_python.py`",
+    "versioned names and reinstalling the app."
+  ],
+  "closed": "2026-10-19",
+  "result": "The Dock app starts again; Homebrew's versioned-only python@3.14 is found.",
+  "evidence": [
+    "find_python tries versioned Homebrew names; 38 unittest OK under python3.14; app reinstalled on the mini 2026-10-19 (old bundle kept as QLC+ Vibra.pre-python-fix-2026-10-19.app), PythonPath=/opt/homebrew/bin/python3.14; open launched qlcplus-qml on 9998 (HTTP 200 in 8 s) and dns-sd -B listed QLC+ Vibra _http._tcp"
+  ]
+}

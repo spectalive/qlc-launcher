@@ -1,0 +1,24 @@
+{
+  "tadu": 2,
+  "id": "t-a5b69a8b-c7c9-4209-81b9-358844c0098e",
+  "title": "**Clients find the show by themselves (from Vibra-Lab/vibra-lighting,",
+  "state": "in_progress",
+  "category": "general",
+  "type": "untriaged",
+  "priority": "untriaged",
+  "notes": [
+    "2026-09-26).** Announce the running show over mDNS/Bonjour, and show a QR",
+    "code with `http://ADDRESS:PORT/`, so a tablet or phone reaches it without",
+    "typing an address.",
+    "2026-10-19: the announce is done. After the HTTP check `launch.py` starts",
+    "`announce_until_exit.py` detached, which keeps `dns-sd -R NAME _http._tcp",
+    "local PORT` alive until that QLC+ PID exits. Verified on the Mac mini with",
+    "a scratch `--test-no-output` launch on 9999 (9998 held by a dummy",
+    "listener): `dns-sd -B _http._tcp local` showed `Add ... QLC+ Announce",
+    "Test` at the HTTP check and `Rmv` when the test QLC+ stopped 90 s later,",
+    "with no `dns-sd` left; `dns-sd -L` resolved it to `Mac-mini-...local.:9997`",
+    "in a detached run. Python only, so the installed app picks it up on its",
+    "next launch with no reinstall. Smallest next step: the QR code with",
+    "`http://ADDRESS:PORT/`."
+  ]
+}
